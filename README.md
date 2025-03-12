@@ -42,6 +42,7 @@ And please dont forget to activate the api feature in icinga2.
 
 ## usage
 
+```
 usage: passify-bareos.py [-h] [--config CONFIG] [--timeout TIMEOUT] [--ttl TTL] -s SERVICE NAME [--prefix-time]
                          {Backup} {Full,Differential,Incremental,VirtualFull} {OK,Error,Fatal Error,Canceled,Differences,Unknown term code} JOB_UID size
 
@@ -61,6 +62,7 @@ options:
   --ttl TTL             TTL argument to pass to icinga api
   -s SERVICE NAME       Specify service name
   --prefix-time         Enable prefixing the service name with the scheduled time.
+```
 
 ## integration into bacula / bareos
 
