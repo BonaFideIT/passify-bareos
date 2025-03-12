@@ -1,0 +1,40 @@
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".git",
+    ".git-rewrite",
+    ".pytype",
+    ".ruff_cache",
+    ".cache",
+    ".hypothesis",
+    "__pypackages__",
+    "_build",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    ".venv",
+    "logs"
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.11
+target-version = "py311"
+
+[lint]
+# see https://docs.astral.sh/ruff/rules/
+select = ["F401", "F402", "F404", "F541", "UP008", "UP009", "UP010", "UP012", "UP029", "W191", "W505", "W291", "W292", "W293", "W605", "E101", "E701", "E702", "E703", "E711", "E712", "I002"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.extend-per-file-ignores]
+# Also ignore `F401` in all `apps.py` files.
+"apps.py" = ["F401"]
