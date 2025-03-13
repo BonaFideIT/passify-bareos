@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "icinga-passify-bareos"
+version = "0.1"
+description = "Transform Bacula / Bareos job results into an Icinga2 API passive check result. This is designed to be used with a RunScript after the job has completed on the agent."
+readme = "README.md"
+authors = [
+    { name = "Bona Fide IT GmbH", email = "github@bona-fide.it" },
+    { name = "Olaf Rühenbeck", email = "oruehenbeck@bona-fide.it" }
+]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["icinga", "api", "passive", "check_command"]
+dependencies = []
+requires-python = ">=3.12"
+
+[project.optional-dependencies]
+dev = ["pipenv", "black", "ruff", "pre-commit"]
+
+[project.urls]
+Homepage = "https://github.com/BonaFideIT/passify-bareos"
+
+[project.scripts]
+passify-bareos = "passify_bareos.passify_bareos:main"
