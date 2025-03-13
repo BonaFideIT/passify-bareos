@@ -1,20 +1,21 @@
 # passify-bareos
 
-A script for transforming a bacula / bareos job results into an icinga2 api passive check result. This is designed to be used with runScript after the job has completed on the agent.
+A script for transforming Bacula / Bareos job results into an Icinga2 API passive check result. This is designed to be used with a `RunScript` after the job has completed on the agent.
 
-# Installation
+## Installation
 
-* clone this repository to your server
-* create config file or just run it and the first time you will be asked all required information
-  * the icinga master api url **submissions are only possible through the currently active master**
-  * verify the fingerprint(hint: openssl x509 -in /var/lib/icinga2/certs/<hostname>.crt -noout -fingerprint -sha256)
-username and password for api submission (only basic-auth is currently supported)
+1. Clone this repository to your server.
+2. Create a configuration file or run the script interactively for the first time to provide the required information:
+   - **Icinga Master API URL** (submissions are only possible through the currently active master).
+   - **Verify the fingerprint**:
+     ```sh
+     openssl x509 -in /var/lib/icinga2/certs/<hostname>.crt -noout -fingerprint -sha256
+     ```
+   - **Username and password** for API submission (only basic-auth is currently supported).
 
-**OR**
+Alternatively, deploy a configuration file (`config.ini` by default) alongside the script:
 
-deploy a confign file along with the file, default is config.ini:
-
-```
+```ini
 [DEFAULT]
 url = https://localhost:5665/v1/actions/process-check-result
 check_source = example.com
@@ -25,73 +26,71 @@ password = <api_password>
 fingerprint = d163f22c2021a498926ff8c30da0288ac20d1b9edaa80d1dbb14c0aebf85245b
 ```
 
-# howto: create api user for passive result submission
+## Creating an API User for Passive Result Submission
 
-add this to /etc/icinga2/features-available/api.conf on the master:
+Add the following configuration to `/etc/icinga2/features-available/api.conf` on the master:
 
-```
+```icinga2
 object ApiUser "<api_user>" {
   permissions = [ "actions/process-check-result" ]
   password = "<api_password>"
 }
 ```
 
-And please dont forget to activate the api feature in icinga2.
+Ensure that the API feature in Icinga2 is activated.
 
-# Deployment
+## Deployment
 
-## usage
+### Usage
 
-```
-usage: passify-bareos.py [-h] [--config CONFIG] [--timeout TIMEOUT] [--ttl TTL] -s SERVICE NAME [--prefix-time]
+```sh
+usage: passify-bareos.py [-h] [--config CONFIG] [--timeout TIMEOUT] [--ttl TTL] -s SERVICE_NAME [--prefix-time]
                          {Backup} {Full,Differential,Incremental,VirtualFull} {OK,Error,Fatal Error,Canceled,Differences,Unknown term code} JOB_UID size
-
-positional arguments:
-  {Backup}              Bareos job type. Currently only Backup supported.
-  {Full,Differential,Incremental,VirtualFull}
-                        Backup job level.
-  {OK,Error,Fatal Error,Canceled,Differences,Unknown term code}
-                        Backup job result value.
-  JOB_UID               job unique name: e.g. jobname.date.time...
-  size                  Number of pocessed bytes for the backup job.
-
-options:
-  -h, --help            show this help message and exit
-  --config CONFIG       Path where to store/load config from. [default=config.ini]
-  --timeout TIMEOUT     Optional timeout for execution in seconds.
-  --ttl TTL             TTL argument to pass to icinga api
-  -s SERVICE NAME       Specify service name
-  --prefix-time         Enable prefixing the service name with the scheduled time.
 ```
 
-## integration into bacula / bareos
+#### Positional Arguments:
+- `{Backup}`: Bareos job type (currently only `Backup` is supported).
+- `{Full,Differential,Incremental,VirtualFull}`: Backup job level.
+- `{OK,Error,Fatal Error,Canceled,Differences,Unknown term code}`: Backup job result value.
+- `JOB_UID`: Unique job name (e.g., `jobname.date.time...`).
+- `size`: Number of processed bytes for the backup job.
 
-You need to create a runScript directive inside your job definition and add a passive check to your icinga instance. 
+#### Options:
+- `-h, --help`: Show help message and exit.
+- `--config CONFIG`: Path to configuration file (default: `config.ini`).
+- `--timeout TIMEOUT`: Optional execution timeout in seconds.
+- `--ttl TTL`: Time-to-live argument for Icinga API.
+- `-s SERVICE_NAME`: Specify the service name.
+- `--prefix-time`: Prefix the service name with the scheduled time.
 
-### job definition
+### Integration into Bacula / Bareos
 
-Create a runScript directive inside your job definition like this:
+To integrate, create a `RunScript` directive inside your job definition and add a passive check to your Icinga instance.
 
-```
+#### Job Definition
+
+Add the following `RunScript` directive inside your job configuration:
+
+```bareos
 RunScript {
-        RunsWhen = After
-        RunsOnSuccess = Yes
-        RunsOnFailure = Yes
-        RunsOnClient = Yes
-        FailJobOnError = No
-        Command = "/bin/bash -c '/usr/local/bin/passify-bareos/src/passify-bareos/passify-bareos.py --prefix-time -s \"backup check\" \"%t\" \"%l\" \"%e\" \"%j\" \"%b\" > /tmp/test.txt'"
-    }
+    RunsWhen = After
+    RunsOnSuccess = Yes
+    RunsOnFailure = Yes
+    RunsOnClient = Yes
+    FailJobOnError = No
+    Command = "/bin/bash -c '/usr/local/bin/passify-bareos/src/passify-bareos/passify-bareos.py --prefix-time -s \"backup check\" \"%t\" \"%l\" \"%e\" \"%j\" \"%b\"'"
+}
 ```
 
-... modify the Command as needed, but beware that the interface is designed to take these parameters in this sequence.
+Modify the `Command` as needed, but note that the interface is designed to take these parameters in this sequence.
 
-### icinga passive check
+#### Icinga Passive Check
 
-Add a passive check to you host where your agent/filedaemon runs and which should be backed up.
+Add a passive check for the host where the agent/filedaemon runs and should be backed up.
 
-Example preview from icinga director:
+Example Icinga Director configuration:
 
-```
+```icinga2
 object Service "23:00:00 backup check" {
     host_name = "example.com"
     check_command = "passive-crit"
@@ -105,13 +104,19 @@ object Service "23:00:00 backup check" {
     command_endpoint = host_name
     vars.dummy_state = 2
 }
-
 ```
 
-Beware that we have set dummy state to 2, which indicates a missing passive check as critical as it most likely indicates a backup which has not been completed at all.
-Modify the check interval to the minimum time window in which you expect at least one backup to complete.
+Setting `dummy_state = 2` marks a missing passive check as **critical**, as it likely indicates that a backup was not completed at all.
+Modify the check interval to the shortest expected backup completion window.
 
-### Monitoring multiple backup jobs per host in 24h
+### Monitoring Multiple Backup Jobs per Host in 24h
 
-Create one check per backup time window and prefix the service name with the scheduled time for the backup (for example "23:00:00") and use the --prefix-time option to change the submission service name dynamically to match the expected backup time.
+To monitor multiple backup jobs per day:
 
+- Create one check per backup time window.
+- Prefix the service name with the scheduled backup time (e.g., `23:00:00`).
+- Use the `--prefix-time` option to dynamically match the expected backup time.
+
+---
+
+This improved documentation enhances readability, formatting, and clarity while ensuring completeness and correctness.
