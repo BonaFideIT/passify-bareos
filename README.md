@@ -79,7 +79,7 @@ RunScript {
         RunsOnFailure = Yes
         RunsOnClient = Yes
         FailJobOnError = No
-        Command = "/bin/bash -c '/usr/local/bin/passify-bareos/src/passify-bareos/passify-bareos.py --prefix-time -s "backup check" \"%t\" \"%l\" \"%e\" \"%j\" \"%b\" > /tmp/test.txt'"
+        Command = "/bin/bash -c '/usr/local/bin/passify-bareos/src/passify-bareos/passify-bareos.py --prefix-time -s \"backup check\" \"%t\" \"%l\" \"%e\" \"%j\" \"%b\" > /tmp/test.txt'"
     }
 ```
 
