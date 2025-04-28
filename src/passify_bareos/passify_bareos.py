@@ -301,7 +301,7 @@ def build_request_data(args, default) -> dict:
 
     # plugin output and performance data
     data["plugin_output"] = (
-        f"{args.type} {args.level} {args.exit_status}: {args.schedule.strftime('%Y-%m-%d %H:%M:%S')}"
+        f"{args.type} {args.level} {args.exit_status}: {args.schedule.strftime('%Y-%m-%d %H:%M')}"
     )
     data["performance_data"] = f"size={human_readable_size(args.size)};;"
 
@@ -315,7 +315,7 @@ def build_request_data(args, default) -> dict:
 
     # prefix service name if requested
     if args.prefix_time:
-        sn = f"{args.schedule.strftime('%H:%M:%S')} {args.s}"
+        sn = f"{args.schedule.strftime('%H:%M')} {args.s}"
     else:
         sn = args.s
 

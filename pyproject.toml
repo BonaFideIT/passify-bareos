@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "icinga-passify-bareos"
-version = "0.1.3"
+version = "0.1.4"
 description = "Transform Bacula / Bareos job results into an Icinga2 API passive check result. This is designed to be used with a RunScript after the job has completed on the agent."
 readme = "README.md"
 authors = [

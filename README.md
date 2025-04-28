@@ -91,7 +91,7 @@ Add a passive check for the host where the agent/filedaemon runs and should be b
 Example Icinga Director configuration:
 
 ```icinga2
-object Service "23:00:00 backup check" {
+object Service "23:00 backup check" {
     host_name = "example.com"
     check_command = "passive-crit"
     max_check_attempts = "1"
@@ -114,9 +114,11 @@ Modify the check interval to the shortest expected backup completion window.
 To monitor multiple backup jobs per day:
 
 - Create one check per backup time window.
-- Prefix the service name with the scheduled backup time (e.g., `23:00:00`).
+- Prefix the service name with the scheduled backup time (e.g., `23:00`).
 - Use the `--prefix-time` option to dynamically match the expected backup time.
 
 ---
 
-This improved documentation enhances readability, formatting, and clarity while ensuring completeness and correctness.
+Changelog:
+
+* reduced time granularity to bareos config format specification granularity
